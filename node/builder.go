@@ -2,14 +2,25 @@ package node
 
 import (
 	"context"
+	"errors"
+	"time"
 
+	"github.com/cskr/pubsub"
 	logging "github.com/ipfs/go-log/v2"
 	metricsi "github.com/ipfs/go-metrics-interface"
+	"github.com/libp2p/go-libp2p-core/host"
+	"github.com/libp2p/go-libp2p-core/peerstore"
+	"github.com/libp2p/go-libp2p-core/routing"
+	dht "github.com/libp2p/go-libp2p-kad-dht"
+	record "github.com/libp2p/go-libp2p-record"
+	"github.com/libp2p/go-libp2p/p2p/net/conngater"
 	"github.com/lyswifter/dbridge/api"
+	"github.com/lyswifter/dbridge/node/config"
 	"github.com/lyswifter/dbridge/node/impl"
 	"github.com/lyswifter/dbridge/node/modules"
 	"github.com/lyswifter/dbridge/node/modules/dtypes"
 	"github.com/lyswifter/dbridge/node/modules/helpers"
+	"github.com/lyswifter/dbridge/node/modules/lp2p"
 	"github.com/lyswifter/dbridge/node/repo"
 	"github.com/lyswifter/dbridge/types"
 	"go.uber.org/fx"
@@ -33,6 +44,18 @@ const (
 
 	StartListeningKey
 	ConnectionManagerKey
+
+	DefaultTransportsKey
+	PstoreAddSelfKeysKey
+	SmuxTransportKey
+	RelayKey
+	SecurityKey
+	DiscoveryHandlerKey
+	BaseRoutingKey
+	BandwidthReporterKey
+	AutoNATSvcKey
+
+	ConnGaterKey
 
 	ExtractApiKey
 
@@ -81,6 +104,65 @@ func defaults() []Option {
 			return helpers.LifecycleCtx(mctx, lc)
 		}),
 	}
+}
+
+var LibP2P = Options(
+	// Host config
+	Override(new(dtypes.Bootstrapper), dtypes.Bootstrapper(false)),
+
+	// Host dependencies
+	Override(new(peerstore.Peerstore), lp2p.Peerstore),
+	Override(PstoreAddSelfKeysKey, lp2p.PstoreAddSelfKeys),
+	Override(StartListeningKey, lp2p.StartListening(config.DefaultDbridgeNode().Libp2p.ListenAddresses)),
+
+	// Host settings
+	Override(DefaultTransportsKey, lp2p.DefaultTransports),
+	Override(AddrsFactoryKey, lp2p.AddrsFactory(nil, nil)),
+	Override(SmuxTransportKey, lp2p.SmuxTransport()),
+	Override(RelayKey, lp2p.NoRelay()),
+	Override(SecurityKey, lp2p.Security(true, false)),
+
+	// Host
+	Override(new(lp2p.RawHost), lp2p.Host),
+	Override(new(host.Host), lp2p.RoutedHost),
+	Override(new(lp2p.BaseIpfsRouting), lp2p.DHTRouting(dht.ModeAuto)),
+
+	Override(DiscoveryHandlerKey, lp2p.DiscoveryHandler),
+
+	// Routing
+	Override(new(record.Validator), modules.RecordValidator),
+	Override(BaseRoutingKey, lp2p.BaseRouting),
+	Override(new(routing.Routing), lp2p.Routing),
+
+	// Services
+	Override(BandwidthReporterKey, lp2p.BandwidthCounter),
+	Override(AutoNATSvcKey, lp2p.AutoNATService),
+
+	// Services (pubsub)
+	Override(new(*dtypes.ScoreKeeper), lp2p.ScoreKeeper),
+	Override(new(*pubsub.PubSub), lp2p.GossipSub),
+	Override(new(*config.Pubsub), func(bs dtypes.Bootstrapper) *config.Pubsub {
+		return &config.Pubsub{
+			Bootstrapper: bool(bs),
+		}
+	}),
+
+	// Services (connection management)
+	Override(ConnectionManagerKey, lp2p.ConnectionManager(50, 200, 20*time.Second, nil)),
+	Override(new(*conngater.BasicConnectionGater), lp2p.ConnGater),
+	Override(ConnGaterKey, lp2p.ConnGaterOption),
+)
+
+func Base() Option {
+	return Options(
+		func(s *Settings) error { s.Base = true; return nil }, // mark Base as applied
+		ApplyIf(func(s *Settings) bool { return s.Config },
+			Error(errors.New("the Base() option must be set before Config option")),
+		),
+		ApplyIf(func(s *Settings) bool { return s.enableLibp2pNode },
+			LibP2P,
+		),
+	)
 }
 
 func Repo(r repo.Repo) Option {

@@ -10,6 +10,8 @@ import (
 	"github.com/filecoin-project/go-jsonrpc/auth"
 	"github.com/gbrlsnchs/jwt/v3"
 	logging "github.com/ipfs/go-log/v2"
+	"github.com/libp2p/go-libp2p-core/peerstore"
+	record "github.com/libp2p/go-libp2p-record"
 	"github.com/lyswifter/dbridge/api"
 	"github.com/lyswifter/dbridge/build"
 	"github.com/lyswifter/dbridge/lib/addrutil"
@@ -27,6 +29,13 @@ const (
 var (
 	log = logging.Logger("modules")
 )
+
+// RecordValidator provides namesys compatible routing record validator
+func RecordValidator(ps peerstore.Peerstore) record.Validator {
+	return record.NamespacedValidator{
+		"pk": record.PublicKeyValidator{},
+	}
+}
 
 type JwtPayload struct {
 	Allow []auth.Permission

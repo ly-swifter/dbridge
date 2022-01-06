@@ -87,11 +87,12 @@ var RunCmd = &cli.Command{
 
 		var api api.FullNode
 		stop, err := node.New(ctx,
-			node.Override(new(dtypes.ShutdownChan), shutdownChan),
-
 			node.FullAPI(&api, node.Lite(isLite)),
 
+			node.Base(),
 			node.Repo(r),
+
+			node.Override(new(dtypes.ShutdownChan), shutdownChan),
 
 			node.ApplyIf(func(s *node.Settings) bool { return cctx.IsSet("api") },
 				node.Override(node.SetApiEndpointKey, func(lr repo.LockedRepo) error {

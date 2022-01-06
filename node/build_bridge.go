@@ -22,7 +22,7 @@ var (
 )
 
 func ConfigFullNode(c interface{}) Option {
-	cfg, ok := c.(*config.FullNode)
+	cfg, ok := c.(*config.BdridgeNode)
 	if !ok {
 		return Error(xerrors.Errorf("invalid config from repo, got: %T", c))
 	}
