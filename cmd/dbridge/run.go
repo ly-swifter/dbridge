@@ -6,6 +6,7 @@ import (
 
 	"github.com/filecoin-project/go-jsonrpc"
 	"github.com/lyswifter/dbridge/api"
+	"github.com/lyswifter/dbridge/lib/peermgr"
 	"github.com/lyswifter/dbridge/node"
 	"github.com/lyswifter/dbridge/node/modules/dtypes"
 	"github.com/lyswifter/dbridge/node/repo"
@@ -82,7 +83,7 @@ var RunCmd = &cli.Command{
 			return err
 		}
 		if !ok {
-			return xerrors.Errorf("repo at '%s' is not initialized, run 'dbridge init' to set it up", bridgeRepoPath)
+			return xerrors.Errorf("repo at '%s' is not initialized, run 'lorry init' to set it up", bridgeRepoPath)
 		}
 
 		var api api.FullNode
@@ -96,7 +97,6 @@ var RunCmd = &cli.Command{
 
 			node.ApplyIf(func(s *node.Settings) bool { return cctx.IsSet("api") },
 				node.Override(node.SetApiEndpointKey, func(lr repo.LockedRepo) error {
-					log.Infof("here: %s", lr.Path())
 					apima, err := multiaddr.NewMultiaddr("/ip4/127.0.0.1/tcp/" +
 						cctx.String("api"))
 					if err != nil {
@@ -104,6 +104,10 @@ var RunCmd = &cli.Command{
 					}
 					return lr.SetAPIEndpoint(apima)
 				})),
+			node.ApplyIf(func(s *node.Settings) bool { return !cctx.Bool("bootstrap") },
+				node.Unset(node.RunPeerMgrKey),
+				node.Unset(new(*peermgr.PeerMgr)),
+			),
 		)
 		if err != nil {
 			return xerrors.Errorf("initializing node: %w", err)
@@ -131,7 +135,7 @@ var RunCmd = &cli.Command{
 		}
 
 		// Serve the RPC.
-		rpcStopper, err := node.ServeRPC(h, "dbridge-daemon", endpoint)
+		rpcStopper, err := node.ServeRPC(h, "lorry-daemon", endpoint)
 		if err != nil {
 			return fmt.Errorf("failed to start json-rpc endpoint: %s", err)
 		}

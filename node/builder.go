@@ -58,6 +58,7 @@ const (
 	AutoNATSvcKey
 
 	ConnGaterKey
+	RunPeerMgrKey
 
 	ExtractApiKey
 

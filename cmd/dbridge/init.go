@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/ipfs/go-datastore"
 	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli/v2"
@@ -58,6 +60,8 @@ var initCmd = &cli.Command{
 		if err := mds.Put(ctx, datastore.NewKey("node-address"), []byte(nodeName)); err != nil {
 			return err
 		}
+
+		fmt.Print("finished\n")
 
 		log.Infof("Initializing dbridge node(%s) at %s, you can now running node with: ./dbridge run", nodeName, FlagDbridgeRepo)
 
