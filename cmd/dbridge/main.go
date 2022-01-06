@@ -16,12 +16,18 @@ const (
 	FlagDbridgeRepo = "dbridge-repo"
 )
 
+var AdvanceBlockCmd *cli.Command
+
 func main() {
 	local := []*cli.Command{
 		sampleCmd,
 		initCmd,
 		RunCmd,
 		StopCmd,
+	}
+
+	if AdvanceBlockCmd != nil {
+		local = append(local, AdvanceBlockCmd)
 	}
 
 	ctx, span := trace.StartSpan(context.Background(), "/cli")
@@ -44,7 +50,7 @@ func main() {
 		After: func(c *cli.Context) error {
 			return nil
 		},
-		Commands: local,
+		Commands: append(local, lcli.Commands...),
 	}
 
 	app.Setup()

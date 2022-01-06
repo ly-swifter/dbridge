@@ -1,7 +1,10 @@
 package cli
 
 import (
+	"strings"
+
 	logging "github.com/ipfs/go-log/v2"
+	"github.com/urfave/cli/v2"
 
 	cliutil "github.com/lyswifter/dbridge/cli/util"
 )
@@ -16,3 +19,12 @@ var DaemonContext = cliutil.DaemonContext
 var ReqContext = cliutil.ReqContext
 
 var GetFullNodeAPI = cliutil.GetFullNodeAPI
+
+var Commands = []*cli.Command{
+	WithCategory("developer", AuthCmd),
+}
+
+func WithCategory(cat string, cmd *cli.Command) *cli.Command {
+	cmd.Category = strings.ToUpper(cat)
+	return cmd
+}
