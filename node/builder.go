@@ -4,8 +4,12 @@ import (
 	"context"
 
 	logging "github.com/ipfs/go-log/v2"
+	metricsi "github.com/ipfs/go-metrics-interface"
+	"github.com/lyswifter/dbridge/api"
+	"github.com/lyswifter/dbridge/node/impl"
 	"github.com/lyswifter/dbridge/node/modules"
 	"github.com/lyswifter/dbridge/node/modules/dtypes"
+	"github.com/lyswifter/dbridge/node/modules/helpers"
 	"github.com/lyswifter/dbridge/node/repo"
 	"github.com/lyswifter/dbridge/types"
 	"go.uber.org/fx"
@@ -26,6 +30,8 @@ const (
 	// InitJournal at position 0 initializes the journal global var as soon as
 	// the system starts, so that it's available for all other components.
 	InitJournalKey = invoke(iota)
+
+	ExtractApiKey
 
 	SetApiEndpointKey
 
@@ -56,14 +62,17 @@ type Settings struct {
 // Basic lotus-app services
 func defaults() []Option {
 	return []Option{
+		Override(new(helpers.MetricsCtx), func() context.Context {
+			return metricsi.CtxScope(context.Background(), "lorry")
+		}),
 
-		// Override(new(dtypes.ShutdownChan), make(chan struct{})),
+		Override(new(dtypes.ShutdownChan), make(chan struct{})),
 
 		// // the great context in the sky, otherwise we can't DI build genesis; there has to be a better
 		// // solution than this hack.
-		// Override(new(context.Context), func(lc fx.Lifecycle, mctx helpers.MetricsCtx) context.Context {
-		// 	return helpers.LifecycleCtx(mctx, lc)
-		// }),
+		Override(new(context.Context), func(lc fx.Lifecycle, mctx helpers.MetricsCtx) context.Context {
+			return helpers.LifecycleCtx(mctx, lc)
+		}),
 	}
 }
 
@@ -128,4 +137,30 @@ func New(ctx context.Context, opts ...Option) (StopFunc, error) {
 	}
 
 	return app.Stop, nil
+}
+
+type FullOption = Option
+
+func Lite(enable bool) FullOption {
+	return func(s *Settings) error {
+		s.Lite = enable
+		return nil
+	}
+}
+
+func FullAPI(out *api.FullNode, fopts ...FullOption) Option {
+	return Options(
+		func(s *Settings) error {
+			s.nodeType = repo.Dbridge
+			s.enableLibp2pNode = true
+			return nil
+		},
+		Options(fopts...),
+		func(s *Settings) error {
+			resAPI := &impl.FullNodeAPI{}
+			s.invokes[ExtractApiKey] = fx.Populate(resAPI)
+			*out = resAPI
+			return nil
+		},
+	)
 }

@@ -5,6 +5,7 @@ import (
 
 	logging "github.com/ipfs/go-log/v2"
 	lcli "github.com/lyswifter/dbridge/cli"
+	cliutil "github.com/lyswifter/dbridge/cli/util"
 	"github.com/lyswifter/dbridge/node/repo"
 	"github.com/urfave/cli/v2"
 	"go.opencensus.io/trace"
@@ -13,7 +14,7 @@ import (
 var log = logging.Logger("main")
 
 const (
-	FlagDbridgeRepo = "dbridge-repo"
+	FlagDbridgeRepo = "repo"
 )
 
 var AdvanceBlockCmd *cli.Command
@@ -43,9 +44,10 @@ func main() {
 				Name:    FlagDbridgeRepo,
 				EnvVars: []string{"DBRIDGE_NODE_PATH"},
 				Hidden:  true,
-				Value:   "~/.dbridge",
+				Value:   "~/.lorry",
 				Usage:   "Specify dbridge node repo path.",
 			},
+			cliutil.FlagVeryVerbose,
 		},
 		After: func(c *cli.Context) error {
 			return nil

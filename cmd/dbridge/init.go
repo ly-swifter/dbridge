@@ -19,7 +19,7 @@ var initCmd = &cli.Command{
 
 		ctx := lcli.ReqContext(c)
 
-		repoPath := c.String("repo")
+		repoPath := c.String(FlagDbridgeRepo)
 
 		log.Infof("repo name: %s", repoPath)
 

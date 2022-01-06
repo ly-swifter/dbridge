@@ -42,9 +42,21 @@ var RunCmd = &cli.Command{
 			Name:  "api",
 			Value: "1234",
 		},
+		&cli.StringFlag{
+			Name:    FlagDbridgeRepo,
+			EnvVars: []string{"DBRIDGE_NODE_PATH"},
+			Hidden:  true,
+			Value:   "~/.lorry",
+			Usage:   "Specify dbridge node repo path.",
+		},
 		&cli.IntFlag{
 			Name:  "api-max-req-size",
 			Usage: "maximum API request size accepted by the JSON RPC server",
+		},
+		&cli.BoolFlag{
+			Name:   "lite",
+			Usage:  "start lorry in lite mode",
+			Hidden: false,
 		},
 	},
 	Action: func(cctx *cli.Context) error {
@@ -55,25 +67,9 @@ var RunCmd = &cli.Command{
 
 		ctx := context.Background()
 
+		isLite := cctx.Bool("lite")
+
 		shutdownChan := make(chan struct{})
-
-		var api api.FullNode
-		stop, err := node.New(ctx,
-			node.Override(new(dtypes.ShutdownChan), shutdownChan),
-
-			node.ApplyIf(func(s *node.Settings) bool { return cctx.IsSet("api") },
-				node.Override(node.SetApiEndpointKey, func(lr repo.LockedRepo) error {
-					apima, err := multiaddr.NewMultiaddr("/ip4/127.0.0.1/tcp/" +
-						cctx.String("api"))
-					if err != nil {
-						return err
-					}
-					return lr.SetAPIEndpoint(apima)
-				})),
-		)
-		if err != nil {
-			return xerrors.Errorf("initializing node: %w", err)
-		}
 
 		bridgeRepoPath := cctx.String(FlagDbridgeRepo)
 		r, err := repo.NewFS(bridgeRepoPath)
@@ -87,6 +83,28 @@ var RunCmd = &cli.Command{
 		}
 		if !ok {
 			return xerrors.Errorf("repo at '%s' is not initialized, run 'dbridge init' to set it up", bridgeRepoPath)
+		}
+
+		var api api.FullNode
+		stop, err := node.New(ctx,
+			node.Override(new(dtypes.ShutdownChan), shutdownChan),
+
+			node.FullAPI(&api, node.Lite(isLite)),
+
+			node.Repo(r),
+
+			node.ApplyIf(func(s *node.Settings) bool { return cctx.IsSet("api") },
+				node.Override(node.SetApiEndpointKey, func(lr repo.LockedRepo) error {
+					apima, err := multiaddr.NewMultiaddr("/ip4/127.0.0.1/tcp/" +
+						cctx.String("api"))
+					if err != nil {
+						return err
+					}
+					return lr.SetAPIEndpoint(apima)
+				})),
+		)
+		if err != nil {
+			return xerrors.Errorf("initializing node: %w", err)
 		}
 
 		endpoint, err := r.APIEndpoint()
