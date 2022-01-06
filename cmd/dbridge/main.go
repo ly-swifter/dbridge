@@ -24,7 +24,6 @@ func main() {
 		sampleCmd,
 		initCmd,
 		RunCmd,
-		StopCmd,
 	}
 
 	if AdvanceBlockCmd != nil {

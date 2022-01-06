@@ -149,4 +149,7 @@ var RunCmd = &cli.Command{
 
 		return nil
 	},
+	Subcommands: []*cli.Command{
+		StopCmd,
+	},
 }

@@ -44,23 +44,43 @@ const (
 	// the system starts, so that it's available for all other components.
 	InitJournalKey = invoke(iota)
 
-	StartListeningKey
-	ConnectionManagerKey
+	// System processes.
+	InitMemoryWatchdog
 
-	DefaultTransportsKey
+	// health checks
+	CheckFDLimit
+
+	// libp2p
 	PstoreAddSelfKeysKey
-	SmuxTransportKey
-	RelayKey
-	SecurityKey
-	DiscoveryHandlerKey
-	BaseRoutingKey
-	BandwidthReporterKey
-	AutoNATSvcKey
+	StartListeningKey
+	BootstrapKey
 
-	ConnGaterKey
+	// filecoin
+	SetGenesisKey
+
+	RunHelloKey
+	RunChainExchangeKey
+	RunChainGraphsync
 	RunPeerMgrKey
 
+	HandleIncomingBlocksKey
+	HandleIncomingMessagesKey
+	HandleMigrateClientFundsKey
+	HandlePaymentChannelManagerKey
+
+	// miner
+	GetParamsKey
+	HandleMigrateProviderFundsKey
+	HandleDealsKey
+	HandleRetrievalKey
+	RunSectorServiceKey
+
+	// daemon
 	ExtractApiKey
+	HeadMetricsKey
+	SettlePaymentChannelsKey
+	RunPeerTaggerKey
+	SetupFallbackBlockstoresKey
 
 	SetApiEndpointKey
 
