@@ -2,8 +2,8 @@ SHELL=/usr/bin/env bash
 
 .PHONY: clean
 clean:
-	rm -f dbridge
+	rm -f lorry
 
 .PHONY: all
 all:
-	go build -o dbridge ./cmd/dbridge
+	go build -o lorry ./cmd/dbridge
