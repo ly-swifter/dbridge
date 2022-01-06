@@ -8,7 +8,9 @@ import (
 	"github.com/cskr/pubsub"
 	logging "github.com/ipfs/go-log/v2"
 	metricsi "github.com/ipfs/go-metrics-interface"
+	ci "github.com/libp2p/go-libp2p-core/crypto"
 	"github.com/libp2p/go-libp2p-core/host"
+	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/libp2p/go-libp2p-core/peerstore"
 	"github.com/libp2p/go-libp2p-core/routing"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
@@ -177,6 +179,11 @@ func Repo(r repo.Repo) Option {
 		}
 		return Options(
 			Override(new(repo.LockedRepo), modules.LockedRepo(lr)), // module handles closing
+
+			Override(new(ci.PrivKey), lp2p.PrivKey),
+			Override(new(ci.PubKey), ci.PrivKey.GetPublic),
+			Override(new(peer.ID), peer.IDFromPublicKey),
+
 			Override(new(types.KeyStore), modules.KeyStore),
 			Override(new(*dtypes.APIAlg), modules.APISecret),
 
