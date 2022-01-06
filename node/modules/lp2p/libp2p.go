@@ -102,11 +102,8 @@ func PstoreAddSelfKeys(id peer.ID, sk crypto.PrivKey, ps peerstore.Peerstore) er
 	if err := ps.AddPubKey(id, sk.GetPublic()); err != nil {
 		return err
 	}
-	err := ps.AddPrivKey(id, sk)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	return ps.AddPrivKey(id, sk)
 }
 
 func simpleOpt(opt libp2p.Option) func() (opts Libp2pOpts, err error) {
