@@ -31,6 +31,9 @@ const (
 	// the system starts, so that it's available for all other components.
 	InitJournalKey = invoke(iota)
 
+	StartListeningKey
+	ConnectionManagerKey
+
 	ExtractApiKey
 
 	SetApiEndpointKey
@@ -59,6 +62,10 @@ type Settings struct {
 	enableLibp2pNode bool
 }
 
+func IsType(t repo.RepoType) func(s *Settings) bool {
+	return func(s *Settings) bool { return s.nodeType == t }
+}
+
 // Basic lotus-app services
 func defaults() []Option {
 	return []Option{
@@ -82,7 +89,7 @@ func Repo(r repo.Repo) Option {
 		if err != nil {
 			return err
 		}
-		_, err = lr.Config()
+		c, err := lr.Config()
 		if err != nil {
 			return err
 		}
@@ -90,6 +97,8 @@ func Repo(r repo.Repo) Option {
 			Override(new(repo.LockedRepo), modules.LockedRepo(lr)), // module handles closing
 			Override(new(types.KeyStore), modules.KeyStore),
 			Override(new(*dtypes.APIAlg), modules.APISecret),
+
+			ApplyIf(IsType(repo.Dbridge), ConfigFullNode(c)),
 		)(settings)
 	}
 }

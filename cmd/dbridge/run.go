@@ -95,6 +95,7 @@ var RunCmd = &cli.Command{
 
 			node.ApplyIf(func(s *node.Settings) bool { return cctx.IsSet("api") },
 				node.Override(node.SetApiEndpointKey, func(lr repo.LockedRepo) error {
+					log.Infof("here: %s", lr.Path())
 					apima, err := multiaddr.NewMultiaddr("/ip4/127.0.0.1/tcp/" +
 						cctx.String("api"))
 					if err != nil {

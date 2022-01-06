@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"context"
 	"crypto/rand"
 	"errors"
 	"io"
@@ -10,6 +11,8 @@ import (
 	"github.com/gbrlsnchs/jwt/v3"
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/lyswifter/dbridge/api"
+	"github.com/lyswifter/dbridge/build"
+	"github.com/lyswifter/dbridge/lib/addrutil"
 	"github.com/lyswifter/dbridge/node/modules/dtypes"
 	"github.com/lyswifter/dbridge/node/repo"
 	"github.com/lyswifter/dbridge/types"
@@ -67,4 +70,14 @@ func APISecret(keystore types.KeyStore, lr repo.LockedRepo) (*dtypes.APIAlg, err
 	}
 
 	return (*dtypes.APIAlg)(jwt.NewHS256(key.PrivateKey)), nil
+}
+
+func ConfigBootstrap(peers []string) func() (dtypes.BootstrapPeers, error) {
+	return func() (dtypes.BootstrapPeers, error) {
+		return addrutil.ParseAddresses(context.TODO(), peers)
+	}
+}
+
+func BuiltinBootstrap() (dtypes.BootstrapPeers, error) {
+	return build.BuiltinBootstrap()
 }
