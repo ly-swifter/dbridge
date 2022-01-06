@@ -40,7 +40,7 @@ func main() {
 		EnableBashCompletion: true,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:    "repo",
+				Name:    FlagDbridgeRepo,
 				EnvVars: []string{"DBRIDGE_NODE_PATH"},
 				Hidden:  true,
 				Value:   "~/.dbridge",

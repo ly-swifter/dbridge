@@ -59,7 +59,7 @@ var initCmd = &cli.Command{
 			return err
 		}
 
-		log.Infof("Initializing dbridge node(%s) at %s, you can now running node with: ./dbridge daemon", nodeName, FlagDbridgeRepo)
+		log.Infof("Initializing dbridge node(%s) at %s, you can now running node with: ./dbridge run", nodeName, FlagDbridgeRepo)
 
 		return nil
 	},
