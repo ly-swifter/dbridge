@@ -7,6 +7,7 @@ import (
 
 	"github.com/filecoin-project/go-jsonrpc/auth"
 	"github.com/google/uuid"
+	"github.com/libp2p/go-libp2p-core/peer"
 	"golang.org/x/xerrors"
 )
 
@@ -29,6 +30,21 @@ type CommonStruct struct {
 type CommonStub struct {
 }
 
+type CommonNetStruct struct {
+	CommonStruct
+
+	NetStruct
+
+	Internal struct {
+	}
+}
+
+type CommonNetStub struct {
+	CommonStub
+
+	NetStub
+}
+
 type FullNodeStruct struct {
 	CommonStruct
 
@@ -42,6 +58,7 @@ type FullNodeStub struct {
 
 type NetStruct struct {
 	Internal struct {
+		ID func(p0 context.Context) (peer.ID, error) `perm:"read"`
 	}
 }
 
@@ -103,6 +120,18 @@ func (s *CommonStub) Shutdown(p0 context.Context) error {
 	return ErrNotSupported
 }
 
+func (s *NetStruct) ID(p0 context.Context) (peer.ID, error) {
+	if s.Internal.ID == nil {
+		return *new(peer.ID), ErrNotSupported
+	}
+	return s.Internal.ID(p0)
+}
+
+func (s *NetStub) ID(p0 context.Context) (peer.ID, error) {
+	return *new(peer.ID), ErrNotSupported
+}
+
 var _ Common = new(CommonStruct)
+var _ CommonNet = new(CommonNetStruct)
 var _ FullNode = new(FullNodeStruct)
 var _ Net = new(NetStruct)

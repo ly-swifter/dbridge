@@ -169,6 +169,32 @@ func GetRawAPI(ctx *cli.Context, t repo.RepoType, version string) (string, http.
 	return addr, ainfo.AuthHeader(), nil
 }
 
+func GetCommonAPI(ctx *cli.Context) (api.CommonNet, jsonrpc.ClientCloser, error) {
+	ti, ok := ctx.App.Metadata["repoType"]
+	if !ok {
+		log.Errorf("unknown repo type, are you sure you want to use GetCommonAPI?")
+		ti = repo.Dbridge
+	}
+	t, ok := ti.(repo.RepoType)
+	if !ok {
+		log.Errorf("repoType type does not match the type of repo.RepoType")
+	}
+
+	// if tn, ok := ctx.App.Metadata["testnode-storage"]; ok {
+	// 	return tn.(api.StorageMiner), func() {}, nil
+	// }
+	// if tn, ok := ctx.App.Metadata["testnode-full"]; ok {
+	// 	return tn.(api.FullNode), func() {}, nil
+	// }
+
+	addr, headers, err := GetRawAPI(ctx, t, "v0")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return client.NewCommonRPCV0(ctx.Context, addr, headers)
+}
+
 func GetFullNodeAPI(ctx *cli.Context) (api.FullNode, jsonrpc.ClientCloser, error) {
 	// if tn, ok := ctx.App.Metadata["testnode-full"]; ok {
 	// 	return &tn.(api.FullNode), func() {}, nil
