@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/ipfs/go-datastore"
+	"github.com/lyswifter/dbridge/types"
 	"github.com/multiformats/go-multiaddr"
 )
 
@@ -75,7 +76,7 @@ type LockedRepo interface {
 	SetAPIToken([]byte) error
 
 	// KeyStore returns store of private keys for Filecoin transactions
-	// KeyStore() (types.KeyStore, error)
+	KeyStore() (types.KeyStore, error)
 
 	// Path returns absolute path of the repo
 	Path() string
