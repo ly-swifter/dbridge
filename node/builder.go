@@ -3,9 +3,9 @@ package node
 import (
 	"context"
 
-	"github.com/filecoin-project/lotus/node/modules/dtypes"
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/lyswifter/dbridge/node/modules"
+	"github.com/lyswifter/dbridge/node/modules/dtypes"
 	"github.com/lyswifter/dbridge/node/repo"
 	"github.com/lyswifter/dbridge/types"
 	"go.uber.org/fx"
@@ -26,6 +26,8 @@ const (
 	// InitJournal at position 0 initializes the journal global var as soon as
 	// the system starts, so that it's available for all other components.
 	InitJournalKey = invoke(iota)
+
+	SetApiEndpointKey
 
 	_nInvokes // keep this last
 )
@@ -77,9 +79,7 @@ func Repo(r repo.Repo) Option {
 		}
 		return Options(
 			Override(new(repo.LockedRepo), modules.LockedRepo(lr)), // module handles closing
-
 			Override(new(types.KeyStore), modules.KeyStore),
-
 			Override(new(*dtypes.APIAlg), modules.APISecret),
 		)(settings)
 	}
