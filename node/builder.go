@@ -185,6 +185,7 @@ func Base() Option {
 		ApplyIf(func(s *Settings) bool { return s.enableLibp2pNode },
 			LibP2P,
 		),
+		Override(new(dtypes.NetworkName), modules.NetworkName),
 	)
 }
 

@@ -10,3 +10,8 @@ func MessagesTopic(netName dtypes.NetworkName) string { return "/lorry/msgs/" + 
 func DhtProtocolName(netName dtypes.NetworkName) protocol.ID {
 	return protocol.ID("/lorry/kad/" + string(netName))
 }
+
+// /////
+// Devnet settings
+
+var Devnet = true

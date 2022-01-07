@@ -11,7 +11,7 @@ import (
 	"github.com/libp2p/go-libp2p-core/peer"
 )
 
-// go:embed bootstrap
+//go:embed bootstrap
 var bootstrapfs embed.FS
 
 func BuiltinBootstrap() ([]peer.AddrInfo, error) {

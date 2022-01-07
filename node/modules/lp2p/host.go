@@ -39,7 +39,6 @@ func Peerstore() (peerstore.Peerstore, error) {
 }
 
 func Host(mctx helpers.MetricsCtx, lc fx.Lifecycle, params P2PHostIn) (RawHost, error) {
-	fmt.Printf("params: %+v\n", params.Peerstore)
 	pkey := params.Peerstore.PrivKey(params.ID)
 	if pkey == nil {
 		return nil, fmt.Errorf("missing private key for node ID: %s", params.ID.Pretty())
