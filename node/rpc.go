@@ -72,7 +72,9 @@ func FullNodeHandler(a api.FullNode, permissioned bool, opts ...jsonrpc.ServerOp
 		fnapi = api.PermissionedFullAPI(a)
 	}
 
-	serveRpc("/rpc/v0", &fnapi)
+	serveRpc("/rpc/v0", fnapi)
+
+	m.PathPrefix("/").Handler(http.DefaultServeMux) // pprof
 
 	return m, nil
 }
