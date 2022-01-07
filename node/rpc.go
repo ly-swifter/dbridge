@@ -10,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/lyswifter/dbridge/api"
+	"github.com/lyswifter/dbridge/metrics/proxy"
 	"github.com/multiformats/go-multiaddr"
 	manet "github.com/multiformats/go-multiaddr/net"
 	"golang.org/x/xerrors"
@@ -50,12 +51,6 @@ func ServeRPC(h http.Handler, id string, addr multiaddr.Multiaddr) (StopFunc, er
 	return srv.Shutdown, err
 }
 
-func metricedFullAPI(a api.FullNode) api.FullNode {
-	var out api.FullNodeStruct
-	//Fixme: something miss here
-	return &out
-}
-
 // FullNodeHandler returns a full node handler, to be mounted as-is on the server.
 func FullNodeHandler(a api.FullNode, permissioned bool, opts ...jsonrpc.ServerOption) (http.Handler, error) {
 	m := mux.NewRouter()
@@ -72,99 +67,12 @@ func FullNodeHandler(a api.FullNode, permissioned bool, opts ...jsonrpc.ServerOp
 		m.Handle(path, handler)
 	}
 
-	//Fixme: impl real api methods
-	fnapi := metricedFullAPI(a)
+	fnapi := proxy.MetricedFullAPI(a)
 	if permissioned {
 		fnapi = api.PermissionedFullAPI(a)
 	}
 
-	// serveRpc("/rpc/v1", fnapi)
-	// serveRpc("/rpc/v0", &v0api.WrapperV1Full{FullNode: fnapi})
-
 	serveRpc("/rpc/v0", &fnapi)
-
-	// Import handler
-	// handleImportFunc := handleImport(a.(*impl.FullNodeAPI))
-	// handleExportFunc := handleExport(a.(*impl.FullNodeAPI))
-	// if permissioned {
-	// 	importAH := &auth.Handler{
-	// 		Verify: a.AuthVerify,
-	// 		Next:   handleImportFunc,
-	// 	}
-	// 	m.Handle("/rest/v0/import", importAH)
-
-	// 	exportAH := &auth.Handler{
-	// 		Verify: a.AuthVerify,
-	// 		Next:   handleExportFunc,
-	// 	}
-	// 	m.Handle("/rest/v0/export", exportAH)
-	// } else {
-	// 	m.HandleFunc("/rest/v0/import", handleImportFunc)
-	// 	m.HandleFunc("/rest/v0/export", handleExportFunc)
-	// }
-
-	// debugging
-	// m.Handle("/debug/metrics", metrics.Exporter())
-	// m.Handle("/debug/pprof-set/block", handleFractionOpt("BlockProfileRate", runtime.SetBlockProfileRate))
-	// m.Handle("/debug/pprof-set/mutex", handleFractionOpt("MutexProfileFraction", func(x int) {
-	// 	runtime.SetMutexProfileFraction(x)
-	// }))
-	// m.PathPrefix("/").Handler(http.DefaultServeMux) // pprof
 
 	return m, nil
 }
-
-// func handleImport(a *impl.FullNodeAPI) func(w http.ResponseWriter, r *http.Request) {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		if r.Method != "PUT" {
-// 			w.WriteHeader(404)
-// 			return
-// 		}
-// 		if !auth.HasPerm(r.Context(), nil, api.PermWrite) {
-// 			w.WriteHeader(401)
-// 			_ = json.NewEncoder(w).Encode(struct{ Error string }{"unauthorized: missing write permission"})
-// 			return
-// 		}
-
-// 		c, err := a.ClientImportLocal(r.Context(), r.Body)
-// 		if err != nil {
-// 			w.WriteHeader(500)
-// 			_ = json.NewEncoder(w).Encode(struct{ Error string }{err.Error()})
-// 			return
-// 		}
-// 		w.WriteHeader(200)
-// 		err = json.NewEncoder(w).Encode(struct{ Cid cid.Cid }{c})
-// 		if err != nil {
-// 			rpclog.Errorf("/rest/v0/import: Writing response failed: %+v", err)
-// 			return
-// 		}
-// 	}
-// }
-
-// func handleExport(a *impl.FullNodeAPI) func(w http.ResponseWriter, r *http.Request) {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		if r.Method != "GET" {
-// 			w.WriteHeader(404)
-// 			return
-// 		}
-// 		if !auth.HasPerm(r.Context(), nil, api.PermWrite) {
-// 			w.WriteHeader(401)
-// 			_ = json.NewEncoder(w).Encode(struct{ Error string }{"unauthorized: missing write permission"})
-// 			return
-// 		}
-
-// 		var eref api.ExportRef
-// 		if err := json.Unmarshal([]byte(r.FormValue("export")), &eref); err != nil {
-// 			http.Error(w, err.Error(), http.StatusBadRequest)
-// 			return
-// 		}
-
-// 		car := r.FormValue("car") == "true"
-
-// 		err := a.ClientExportInto(r.Context(), eref, car, client.ExportDest{Writer: w})
-// 		if err != nil {
-// 			http.Error(w, err.Error(), http.StatusInternalServerError)
-// 			return
-// 		}
-// 	}
-// }

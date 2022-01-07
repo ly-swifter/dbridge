@@ -11,7 +11,7 @@ import (
 // NewCommonRPCV0 creates a new http jsonrpc client.
 func NewCommonRPCV0(ctx context.Context, addr string, requestHeader http.Header) (api.CommonNet, jsonrpc.ClientCloser, error) {
 	var res api.CommonNetStruct
-	closer, err := jsonrpc.NewMergeClient(ctx, addr, "Filecoin",
+	closer, err := jsonrpc.NewMergeClient(ctx, addr, "Dbridge",
 		api.GetInternalStructs(&res), requestHeader)
 
 	return &res, closer, err

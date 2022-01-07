@@ -31,7 +31,7 @@ var AuthCreateAdminToken = &cli.Command{
 	},
 
 	Action: func(cctx *cli.Context) error {
-		napi, closer, err := GetAPI(cctx)
+		napi, closer, err := GetFullNodeAPI(cctx)
 		if err != nil {
 			return err
 		}
@@ -79,7 +79,7 @@ var AuthApiInfoToken = &cli.Command{
 	},
 
 	Action: func(cctx *cli.Context) error {
-		napi, closer, err := GetAPI(cctx)
+		napi, closer, err := GetFullNodeAPI(cctx)
 		if err != nil {
 			return err
 		}

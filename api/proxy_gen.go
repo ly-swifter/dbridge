@@ -51,12 +51,16 @@ type CommonNetStub struct {
 type FullNodeStruct struct {
 	CommonStruct
 
+	NetStruct
+
 	Internal struct {
 	}
 }
 
 type FullNodeStub struct {
 	CommonStub
+
+	NetStub
 }
 
 type NetStruct struct {

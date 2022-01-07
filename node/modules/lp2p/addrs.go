@@ -98,6 +98,7 @@ func StartListening(addresses []string) func(host host.Host) error {
 		if err != nil {
 			return err
 		}
+		fmt.Printf("Swarm listening at: %s\n", addrs)
 		log.Infof("Swarm listening at: %s", addrs)
 		return nil
 	}
