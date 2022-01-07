@@ -22,6 +22,7 @@ var GetFullNodeAPI = cliutil.GetFullNodeAPI
 
 var Commands = []*cli.Command{
 	WithCategory("developer", AuthCmd),
+	WithCategory("network", NetCmd),
 }
 
 func WithCategory(cat string, cmd *cli.Command) *cli.Command {

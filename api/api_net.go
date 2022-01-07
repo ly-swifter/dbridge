@@ -33,6 +33,11 @@ type Net interface {
 	// usage and current rate per protocol
 	NetBandwidthStatsByProtocol(ctx context.Context) (map[protocol.ID]metrics.Stats, error) //perm:read
 
+	// ConnectionGater API
+	NetBlockAdd(ctx context.Context, acl NetBlockList) error    //perm:admin
+	NetBlockRemove(ctx context.Context, acl NetBlockList) error //perm:admin
+	NetBlockList(ctx context.Context) (NetBlockList, error)     //perm:read
+
 	// ID returns peerID of libp2p node backing this API
 	ID(context.Context) (peer.ID, error) //perm:read
 }

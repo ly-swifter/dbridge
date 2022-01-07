@@ -79,6 +79,12 @@ type NetStruct struct {
 
 		NetBandwidthStatsByProtocol func(p0 context.Context) (map[protocol.ID]metrics.Stats, error) `perm:"read"`
 
+		NetBlockAdd func(p0 context.Context, p1 NetBlockList) error `perm:"admin"`
+
+		NetBlockList func(p0 context.Context) (NetBlockList, error) `perm:"read"`
+
+		NetBlockRemove func(p0 context.Context, p1 NetBlockList) error `perm:"admin"`
+
 		NetConnect func(p0 context.Context, p1 peer.AddrInfo) error `perm:"write"`
 
 		NetConnectedness func(p0 context.Context, p1 peer.ID) (network.Connectedness, error) `perm:"read"`
@@ -228,6 +234,39 @@ func (s *NetStruct) NetBandwidthStatsByProtocol(p0 context.Context) (map[protoco
 
 func (s *NetStub) NetBandwidthStatsByProtocol(p0 context.Context) (map[protocol.ID]metrics.Stats, error) {
 	return *new(map[protocol.ID]metrics.Stats), ErrNotSupported
+}
+
+func (s *NetStruct) NetBlockAdd(p0 context.Context, p1 NetBlockList) error {
+	if s.Internal.NetBlockAdd == nil {
+		return ErrNotSupported
+	}
+	return s.Internal.NetBlockAdd(p0, p1)
+}
+
+func (s *NetStub) NetBlockAdd(p0 context.Context, p1 NetBlockList) error {
+	return ErrNotSupported
+}
+
+func (s *NetStruct) NetBlockList(p0 context.Context) (NetBlockList, error) {
+	if s.Internal.NetBlockList == nil {
+		return *new(NetBlockList), ErrNotSupported
+	}
+	return s.Internal.NetBlockList(p0)
+}
+
+func (s *NetStub) NetBlockList(p0 context.Context) (NetBlockList, error) {
+	return *new(NetBlockList), ErrNotSupported
+}
+
+func (s *NetStruct) NetBlockRemove(p0 context.Context, p1 NetBlockList) error {
+	if s.Internal.NetBlockRemove == nil {
+		return ErrNotSupported
+	}
+	return s.Internal.NetBlockRemove(p0, p1)
+}
+
+func (s *NetStub) NetBlockRemove(p0 context.Context, p1 NetBlockList) error {
+	return ErrNotSupported
 }
 
 func (s *NetStruct) NetConnect(p0 context.Context, p1 peer.AddrInfo) error {

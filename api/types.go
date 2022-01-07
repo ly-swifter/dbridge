@@ -12,6 +12,12 @@ type PubsubScore struct {
 	Score *pubsub.PeerScoreSnapshot
 }
 
+type NetBlockList struct {
+	Peers     []peer.ID
+	IPAddrs   []string
+	IPSubnets []string
+}
+
 type ExtendedPeerInfo struct {
 	ID          peer.ID
 	Agent       string
